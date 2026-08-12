@@ -1,56 +1,134 @@
-# Welcome to your Expo app 👋
+# MovieBook — React Native Assignment
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native movie application built as part of the TenTwenty React Native development assignment.
 
-## Get started
+The application uses **The Movie Database (TMDB) API** to display upcoming movies and provides movie details, trailer playback, search, and a movie ticket booking UI.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+* Upcoming movies listing
+* Movie details
+* Movie posters and images
+* Watch trailer with full-screen playback
+* Automatic trailer completion handling
+* Movie search
+* Movie ticket booking flow
+* Date and showtime selection
+* Interactive seat mapping UI
+* Booking summary
+* Responsive and reusable UI components
 
-2. Start the app
+## Tech Stack
 
-   ```bash
-   npx expo start
-   ```
+* React Native
+* Expo
+* TypeScript
+* Expo Router
+* TMDB API
+* React Hooks
+* Clean Architecture-inspired structure
 
-In the output, you'll find options to open the app in a
+## Architecture
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+The project follows a layered architecture to keep UI, business logic, data handling, and infrastructure concerns separated.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+src/
+├── app/                # Expo Router screens and navigation
+├── core/               # Network, errors, theme, utilities
+├── data/               # API, models, mappers, repositories
+├── domain/             # Entities, repository contracts, use cases
+├── presentation/       # Feature UI, components and hooks
+└── store/              # Application UI state
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Data Flow
 
-### Other setup steps
+```text
+Presentation
+     ↓
+Domain / Use Cases
+     ↓
+Repository
+     ↓
+Remote Data Source
+     ↓
+TMDB API
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## TMDB API
 
-## Learn more
+The application uses the following TMDB functionality:
 
-To learn more about developing your project with Expo, look at the following resources:
+* Upcoming Movies
+* Movie Details
+* Movie Images
+* Movie Videos
+* Movie Search
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Environment Setup
 
-## Join the community
+Create a `.env` file in the project root:
 
-Join our community of developers creating universal apps.
+```env
+EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+The API key is intentionally excluded from version control.
+
+An `.env.example` file is included as a reference.
+
+## Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/sohaibqureshi234/moviebook-react-native-assignment.git
+cd moviebook-react-native-assignment
+npm install
+```
+
+Start the application:
+
+```bash
+npx expo start
+```
+
+## Testing
+
+The project was validated with:
+
+```bash
+npx tsc --noEmit
+npm run lint
+git diff --check
+```
+
+The application was also tested on an iOS simulator.
+
+## Booking
+
+The ticket booking and seat mapping functionality is implemented as a UI-only flow according to the assignment requirements. No real payment or booking backend is connected.
+
+## Environment Variables
+
+Do not commit the actual `.env` file or API credentials.
+
+Use:
+
+```text
+.env.example
+```
+
+as the configuration reference.
+
+## Assignment Deliverables
+
+* GitHub source code
+* Application demo recording
+* Android APK
+* Code structure / architecture walkthrough
+
+## Author
+
+**Sohaib Qureshi**
