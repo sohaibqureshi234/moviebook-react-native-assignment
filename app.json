@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "reactNative_Assesment",
-    "slug": "reactNative_Assesment",
+    "name": "MovieBook",
+    "slug": "MovieBook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

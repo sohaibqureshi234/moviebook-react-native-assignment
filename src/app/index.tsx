@@ -1,98 +1,150 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SymbolView } from 'expo-symbols';
+import { useRouter } from 'expo-router';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { colors, layout, radius, spacing, typography } from '@/core/theme';
+import type { Movie } from '@/domain/entities/movie';
+import { MovieCard } from '@/presentation/movie/components/movie-card';
+import { useUpcomingMovies } from '@/presentation/movie/hooks/use-upcoming-movies';
+import { BottomTabBar } from '@/presentation/components/common';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const safeAreaInsets = useSafeAreaInsets();
+  const { error, isLoading, movies, retry } = useUpcomingMovies();
+
+  const renderMovie = ({ item }: { item: Movie }) => (
+    <MovieCard
+      movie={item}
+      onPress={() => router.push({ pathname: '/movie/[id]', params: { id: item.id } })}
+    />
+  );
+
+  const listBottomPadding = layout.bottomNavigationHeight + safeAreaInsets.bottom + spacing.xxl;
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+    <View style={styles.container}>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <SafeAreaView style={styles.header}>
+        {/* Figma: Poppins Medium 16px, #202C43, top:64 left:22 */}
+        <Text style={styles.screenTitle}>Watch</Text>
+        <Pressable
+          accessibilityLabel="Search movies"
+          accessibilityRole="button"
+          hitSlop={spacing.sm}
+          onPress={() => router.push('/search')}
+        >
+          <SymbolView
+            name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
+            size={22}
+            tintColor={colors.textPrimary}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+        </Pressable>
       </SafeAreaView>
-    </ThemedView>
+
+      {/* ── Content ─────────────────────────────────────────────────────── */}
+      {isLoading ? (
+        <View style={styles.stateContainer}>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </View>
+      ) : error ? (
+        <View style={styles.stateContainer}>
+          <Text style={styles.stateTitle}>Unable to load movies</Text>
+          <Text style={styles.stateDescription}>Please check your connection and try again.</Text>
+          <Pressable accessibilityRole="button" onPress={retry} style={styles.retryButton}>
+            <Text style={styles.retryLabel}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
+          data={movies}
+          initialNumToRender={4}
+          keyExtractor={(movie) => movie.id}
+          ListEmptyComponent={
+            <View style={styles.stateContainer}>
+              <Text style={styles.stateTitle}>No upcoming movies</Text>
+              <Text style={styles.stateDescription}>Please check back again soon.</Text>
+            </View>
+          }
+          renderItem={renderMovie}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {/* ── Bottom Navigation ────────────────────────────────────────────── */}
+      <View style={styles.navigationSafeArea}>
+        <BottomTabBar activeTab="watch" />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: colors.background,
     flex: 1,
-    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    paddingTop: spacing.md,
   },
-  safeArea: {
+  screenTitle: {
+    ...typography.screenTitle,
+    color: colors.textPrimary,
+  },
+  listContent: {
+    gap: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+  },
+  stateContainer: {
+    alignItems: 'center',
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    paddingHorizontal: spacing.xxl,
   },
-  title: {
+  stateTitle: {
+    ...typography.screenTitle,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+  stateDescription: {
+    ...typography.bodySecondary,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+    textAlign: 'center',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  retryButton: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.control,
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.md,
+  },
+  retryLabel: {
+    ...typography.button,
+    color: colors.onPrimary,
+  },
+  navigationSafeArea: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
 });
